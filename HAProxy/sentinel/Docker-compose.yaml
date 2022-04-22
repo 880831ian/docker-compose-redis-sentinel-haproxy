@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  haproxy:
+    image: haproxy
+    container_name: haproxy
+    volumes:
+      - ../docker-volume/haproxy/:/usr/local/etc/haproxy
+    environment:
+      - TZ=Asia/Taipei
+    networks:
+      HAProxy_Redis:
+        ipv4_address: 172.20.0.20
+    ports:
+      - 16379:6379
+      - 8404:8404
+
+  sentinel1:
+    image: redis
+    container_name: redis-sentinel-1
+    networks:
+      HAProxy_Redis:
+    ports:
+      - 26379:26379
+    command: redis-server /usr/local/etc/redis/sentinel.conf --sentinel
+    volumes:
+      - ./sentinel1:/usr/local/etc/redis/
+      - ../log/sentinel1:/var/log/redis/
+    environment:
+      - TZ=Asia/Taipei
+
+  sentinel2:
+    image: redis
+    container_name: redis-sentinel-2
+    networks:
+      HAProxy_Redis:
+    ports:
+      - 26380:26379
+    command: redis-server /usr/local/etc/redis/sentinel.conf --sentinel
+    volumes:
+      - ./sentinel2:/usr/local/etc/redis/
+      - ../log/sentinel2:/var/log/redis/
+    environment:
+      - TZ=Asia/Taipei
+
+  sentinel3:
+    image: redis
+    container_name: redis-sentinel-3
+    networks:
+      HAProxy_Redis:
+    ports:
+      - 26381:26379
+    command: redis-server /usr/local/etc/redis/sentinel.conf --sentinel
+    volumes:
+      - ./sentinel3:/usr/local/etc/redis/
+      - ../log/sentinel3:/var/log/redis/
+    environment:
+      - TZ=Asia/Taipei
+
+networks:
+  HAProxy_Redis:
+    external:
+      name: HAProxy_Redis

@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:1.20
+    container_name: nginx
+    networks:
+      HAProxy_Redis:
+    ports:
+      - "8888:80"
+    volumes:
+      - ./docker-volume/nginx/:/etc/nginx/conf.d/
+      - ./log/nginx/:/var/log/nginx/
+    environment:
+      - TZ=Asia/Taipei
+
+  php:
+    build: ./php
+    container_name: php
+    networks:
+      HAProxy_Redis:
+    expose:
+      - 9000
+    volumes:
+      - ./docker-volume/php/:/var/www/html
+
+  redis1:
+    image: redis
+    container_name: redis1
+    command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
+    volumes:
+      - ./docker-volume/redis/redis1/:/data
+      - ./docker-volume/redis/:/usr/local/etc/redis/
+      - ./log/redis1:/var/log/redis/
+    environment:
+      - TZ=Asia/Taipei
+    networks:
+      HAProxy_Redis:
+        ipv4_address: 172.20.0.11
+    ports:
+      - 6379:6379
+
+  redis2:
+    image: redis
+    container_name: redis2
+    command: redis-server /usr/local/etc/redis/redis.conf --slaveof redis1 6379 --appendonly yes
+    volumes:
+      - ./docker-volume/redis/redis2/:/data
+      - ./docker-volume/redis/:/usr/local/etc/redis/
+      - ./log/redis2:/var/log/redis/
+    environment:
+      - TZ=Asia/Taipei
+    networks:
+      HAProxy_Redis:
+        ipv4_address: 172.20.0.12
+    ports:
+      - 6380:6379
+    depends_on:
+      - redis1
+
+  redis3:
+    image: redis
+    container_name: redis3
+    command: redis-server /usr/local/etc/redis/redis.conf --slaveof redis1 6379 --appendonly yes
+    volumes:
+      - ./docker-volume/redis/redis3/:/data
+      - ./docker-volume/redis/:/usr/local/etc/redis/
+      - ./log/redis3:/var/log/redis/
+    environment:
+      - TZ=Asia/Taipei
+    networks:
+      HAProxy_Redis:
+        ipv4_address: 172.20.0.13
+    ports:
+      - 6381:6379
+    depends_on:
+      - redis1
+      - redis2
+
+networks:
+  HAProxy_Redis:
+    driver: bridge
+    name: HAProxy_Redis
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
