@@ -16,6 +16,8 @@ HAProxy 是一個使用 C 語言編寫的自由及開放原始碼軟體，其提
 <br>
 
 ![圖片](https://raw.githubusercontent.com/880831ian/docker-compose-redis-sentinel-haproxy/master/images/haproxy.png)
+(來源：HAProxy 與 Reids Sentinel 示意圖 [selcukusta/redis-sentinel-with-haproxy](https://github.com/selcukusta/redis-sentinel-with-haproxy))
+
 
 <br>
 
